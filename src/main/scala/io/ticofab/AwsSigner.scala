@@ -9,7 +9,7 @@ import javax.crypto.spec.SecretKeySpec
 import com.amazonaws.auth.{AWSCredentials, AWSCredentialsProvider}
 import org.apache.commons.codec.binary.Hex
 import org.joda.time.DateTime
-import org.joda.time.format.{DateTimeFormat, DateTimeFormatterBuilder}
+import org.joda.time.format.{DateTimeFormat, ISODateTimeFormat}
 
 import scala.collection.mutable
 
@@ -48,7 +48,7 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
                        method: String,
                        queryParams: Map[String, String],
                        headers: Map[String, Object],
-                       payload: Option[Array[Byte]]): Map[String, Object] = {
+                       payload: Option[Array[Byte]]): Map[String, String] = {
     val now: DateTime = clock.apply()
     val credentials: AWSCredentials = credentialsProvider.getCredentials
 
@@ -85,7 +85,7 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
 
     result += (AUTHORIZATION -> autorizationHeader)
 
-    result.toMap
+    result.mapValues(_.toString).toMap
   }
 
   private def queryParamsString(queryParams: Map[String, String]) =
@@ -113,7 +113,7 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
   }
 
   private def getCredentialScope(now: DateTime): String = {
-    now.toString(DATE_FORMATTER) + SLASH + region + SLASH + service + AWS4_REQUEST
+    now.toString(ISODateTimeFormat.basicDate()) + SLASH + region + SLASH + service + AWS4_REQUEST
   }
 
   private def hash(payload: Array[Byte]): Array[Byte] = {

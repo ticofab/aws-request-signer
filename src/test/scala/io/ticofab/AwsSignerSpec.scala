@@ -5,6 +5,8 @@ import com.amazonaws.internal.StaticCredentialsProvider
 import org.joda.time.DateTime
 import org.scalatest.{FlatSpec, Matchers}
 
+import scala.collection.immutable.TreeMap
+
 class AwsSignerSpec extends FlatSpec with Matchers {
   "AwsSigner" should "do something" in {
 
@@ -37,6 +39,15 @@ class AwsSignerSpec extends FlatSpec with Matchers {
       awsAccessKey, region, service, expectedSignature
     )
 
+    var caseInsensitiveSignedHeaders = new TreeMap[String, String]
+    caseInsensitiveSignedHeaders ++= signedHeaders
+    assert(caseInsensitiveSignedHeaders.contains("Authorization"))
+    assert(caseInsensitiveSignedHeaders.getOrElse("Authorization", "").equals(expectedAuthorizationHeader))
+    assert(caseInsensitiveSignedHeaders.contains("Host"))
+    assert(caseInsensitiveSignedHeaders.getOrElse("Host", "").equals(host))
+    assert(caseInsensitiveSignedHeaders.contains("Date"))
+    assert(caseInsensitiveSignedHeaders.getOrElse("Date", "").equals(date))
+    assert(!caseInsensitiveSignedHeaders.contains("X-Amz-Date"))
 
   }
 }
