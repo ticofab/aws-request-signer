@@ -11,7 +11,7 @@ import org.apache.commons.codec.binary.Hex
 import org.joda.time.DateTime
 import org.joda.time.format.{DateTimeFormat, ISODateTimeFormat}
 
-import scala.collection.mutable
+import scala.collection.immutable.TreeMap
 
 /**
   * Inspired By: https://github.com/inreachventures/aws-signing-request-interceptor
@@ -52,7 +52,7 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
     val now: DateTime = clock.apply()
     val credentials: AWSCredentials = credentialsProvider.getCredentials
 
-    var result = mutable.Map[String, Object]()
+    var result = TreeMap[String, Object]()(Ordering.by(_.toLowerCase))
     for ((key, value) <- headers) result += key -> value
 
     if (!result.contains(DATE)) {
@@ -74,7 +74,7 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
       queryParamsString(queryParams) + RETURN +
       headersString + RETURN +
       signedHeaderKeys + RETURN +
-      toBase16(payload.getOrElse(EMPTY.getBytes(StandardCharsets.UTF_8)))
+      toBase16(hash(payload.getOrElse(EMPTY.getBytes(StandardCharsets.UTF_8))))
 
     val stringToSign = createStringToSign(canonicalRequest, now)
     val signature = sign(stringToSign, now, credentials)
@@ -132,7 +132,7 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
 
   private def getSignatureKey(now: DateTime, credentials: AWSCredentials): Array[Byte] = {
     val kSecret: Array[Byte] = (AWS4 + credentials.getAWSSecretKey).getBytes(StandardCharsets.UTF_8)
-    val kDate: Array[Byte] = hmacSHA256(now.toString(DATE_FORMATTER), kSecret)
+    val kDate: Array[Byte] = hmacSHA256(now.toString(ISODateTimeFormat.basicDate()), kSecret)
     val kRegion: Array[Byte] = hmacSHA256(region, kDate)
     val kService: Array[Byte] = hmacSHA256(service, kRegion)
     hmacSHA256(AWS_4_REQUEST, kService)

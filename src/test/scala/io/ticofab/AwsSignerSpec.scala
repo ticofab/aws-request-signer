@@ -8,7 +8,16 @@ import org.scalatest.{FlatSpec, Matchers}
 import scala.collection.immutable.TreeMap
 
 class AwsSignerSpec extends FlatSpec with Matchers {
-  "AwsSigner" should "do something" in {
+  /**
+    * Test case given in AWS Signing Test Suite (http://docs.aws.amazon.com/general/latest/gr/signature-v4-test-suite.html)
+    * (get-vanilla.*)
+    *
+    * GET / http/1.1
+    * Date:Mon, 09 Sep 2011 23:36:00 GMT
+    * Host:host.foo.com
+    *
+    */
+  "AwsSigner" should "produce the expected result" in {
 
     // GIVEN
     // Credentials
