@@ -2,7 +2,9 @@ name := """aws-request-signer"""
 
 organization := "io.ticofab"
 
-licenses += ("The Apache Software License, Version 2.0", url("http://www.apache.org/licenses/LICENSE-2.0.txt"))
+version := "0.1.0"
+
+licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
 
@@ -18,5 +20,7 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-core" % "1.10.19"
 
 )
+
+bintrayPackageLabels := Seq("scala", "aws")
 
 com.typesafe.sbt.SbtGit.versionWithGit
