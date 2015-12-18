@@ -47,12 +47,12 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
   def getSignedHeaders(uri: String,
                        method: String,
                        queryParams: Map[String, String],
-                       headers: Map[String, Object],
+                       headers: Map[String, String],
                        payload: Option[Array[Byte]]): Map[String, String] = {
     val now: DateTime = clock.apply()
     val credentials: AWSCredentials = credentialsProvider.getCredentials
 
-    var result = TreeMap[String, Object]()(Ordering.by(_.toLowerCase))
+    var result = TreeMap[String, String]()(Ordering.by(_.toLowerCase))
     for ((key, value) <- headers) result += key -> value
 
     if (!result.contains(DATE)) {
@@ -85,7 +85,7 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
 
     result += (AUTHORIZATION -> autorizationHeader)
 
-    result.mapValues(_.toString).toMap
+    result.toMap
   }
 
   private def queryParamsString(queryParams: Map[String, String]) =
