@@ -1,36 +1,33 @@
 package io.ticofab
 
 import java.lang.String._
+import java.time.LocalDateTime
 
-import com.amazonaws.auth.{AWSCredentials, AWSCredentialsProvider, BasicAWSCredentials, BasicSessionCredentials}
-import com.amazonaws.internal.StaticCredentialsProvider
-import org.joda.time.DateTime
 import org.scalatest.{FlatSpec, Matchers}
 
 class AwsSignerSpec extends FlatSpec with Matchers {
 
   /**
-    * Test case given in AWS Signing Test Suite (http://docs.aws.amazon.com/general/latest/gr/signature-v4-test-suite.html)
-    * (get-vanilla.*)
-    *
-    * GET / http/1.1
-    * Date:Mon, 09 Sep 2011 23:36:00 GMT
-    * Host:host.foo.com
-    *
-    */
+   * Test case given in AWS Signing Test Suite (http://docs.aws.amazon.com/general/latest/gr/signature-v4-test-suite.html)
+   * (get-vanilla.*)
+   *
+   * GET / http/1.1
+   * Date:Mon, 09 Sep 2011 23:36:00 GMT
+   * Host:host.foo.com
+   *
+   */
   "AwsSigner" should "pass the GET vanilla test" in {
 
     // GIVEN
     // Credentials
     val awsAccessKey = "AKIDEXAMPLE"
     val awsSecretKey = "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY"
-    val credentials: AWSCredentials = new BasicAWSCredentials(awsAccessKey, awsSecretKey)
-    val awsCredentialsProvider: AWSCredentialsProvider = new StaticCredentialsProvider(credentials)
+    val credentials = new AwsCredentials(AccessKeyID(awsAccessKey), SecretAccessKey(awsSecretKey))
     val region = "us-east-1"
     val service = "host"
 
     // DATE
-    def clock(): DateTime = new DateTime().withDate(2011, 9, 9).withHourOfDay(23).withMinuteOfHour(36).withSecondOfMinute(0)
+    def clock(): LocalDateTime = LocalDateTime.of(2011, 9, 9, 23, 36, 0)
     // weird date : 09 Sep 2011 is a friday, not a monday
     val date = "Mon, 09 Sep 2011 23:36:00 GMT"
 
@@ -41,7 +38,7 @@ class AwsSignerSpec extends FlatSpec with Matchers {
     val headers: Map[String, String] = Map("Date" -> date, "Host" -> host)
     val payload: Option[Array[Byte]] = None
 
-    val signer: AwsSigner = AwsSigner(awsCredentialsProvider, region, service, clock)
+    val signer: AwsSigner = AwsSigner(credentials, region, service, clock)
     val signedHeaders = signer.getSignedHeaders(uri, method, queryParams, headers, payload)
 
     // The signature must match the expected signature
@@ -63,26 +60,25 @@ class AwsSignerSpec extends FlatSpec with Matchers {
   }
 
   /**
-    * Test case given in AWS Signing Test Suite (http://docs.aws.amazon.com/general/latest/gr/signature-v4-test-suite.html)
-    * (post-vanilla-query.*)
-    *
-    * POST /?foo=bar http/1.1
-    * Date:Mon, 09 Sep 2011 23:36:00 GMT
-    * Host:host.foo.com
-    *
-    */
+   * Test case given in AWS Signing Test Suite (http://docs.aws.amazon.com/general/latest/gr/signature-v4-test-suite.html)
+   * (post-vanilla-query.*)
+   *
+   * POST /?foo=bar http/1.1
+   * Date:Mon, 09 Sep 2011 23:36:00 GMT
+   * Host:host.foo.com
+   *
+   */
   it should "pass the POST query vanilla test" in {
     // GIVEN
     // Credentials
     val awsAccessKey: String = "AKIDEXAMPLE"
     val awsSecretKey: String = "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY"
-    val credentials: AWSCredentials = new BasicAWSCredentials(awsAccessKey, awsSecretKey)
-    val awsCredentialsProvider: AWSCredentialsProvider = new StaticCredentialsProvider(credentials)
+    val credentials = new AwsCredentials(AccessKeyID(awsAccessKey), SecretAccessKey(awsSecretKey))
     val region: String = "us-east-1"
     val service: String = "host"
 
     // Date
-    def clock(): DateTime = new DateTime().withDate(2011, 9, 9).withHourOfDay(23).withMinuteOfHour(36).withSecondOfMinute(0)
+    def clock(): LocalDateTime = LocalDateTime.of(2011, 9, 9, 23, 36, 0)
     // weird date : 09 Sep 2011 is a friday, not a monday
     val date = "Mon, 09 Sep 2011 23:36:00 GMT"
 
@@ -96,7 +92,7 @@ class AwsSignerSpec extends FlatSpec with Matchers {
 
     // WHEN
     // The request is signed
-    val signer: AwsSigner = AwsSigner(awsCredentialsProvider, region, service, clock)
+    val signer: AwsSigner = AwsSigner(credentials, region, service, clock)
     val signedHeaders = signer.getSignedHeaders(uri, method, queryParams, headers, payload)
 
     // THEN
@@ -119,13 +115,12 @@ class AwsSignerSpec extends FlatSpec with Matchers {
     // Credentials
     val awsAccessKey: String = "AKIDEXAMPLE"
     val awsSecretKey: String = "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY"
-    val credentials: AWSCredentials = new BasicAWSCredentials(awsAccessKey, awsSecretKey)
-    val awsCredentialsProvider: AWSCredentialsProvider = new StaticCredentialsProvider(credentials)
+    val credentials = new AwsCredentials(AccessKeyID(awsAccessKey), SecretAccessKey(awsSecretKey))
     val region: String = "us-east-1"
     val service: String = "host"
 
     // Date
-    def clock(): DateTime = new DateTime().withDate(2011, 9, 9).withHourOfDay(23).withMinuteOfHour(36).withSecondOfMinute(0)
+    def clock(): LocalDateTime = LocalDateTime.of(2011, 9, 9, 23, 36, 0)
     // weird date : 09 Sep 2011 is a friday, not a monday
     val date: String = "20110909T233600Z"
 
@@ -139,7 +134,7 @@ class AwsSignerSpec extends FlatSpec with Matchers {
 
     // WHEN
     // The request is signed
-    val signer: AwsSigner = AwsSigner(awsCredentialsProvider, region, service, clock)
+    val signer: AwsSigner = AwsSigner(credentials, region, service, clock)
     val signedHeaders = signer.getSignedHeaders(uri, method, queryParams, headers, payload)
 
     // THEN
@@ -164,13 +159,12 @@ class AwsSignerSpec extends FlatSpec with Matchers {
     val awsAccessKey: String = "AKIDEXAMPLE"
     val awsSecretKey: String = "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY"
     val sessionToken: String = "AKIDEXAMPLESESSION"
-    val credentials: AWSCredentials = new BasicSessionCredentials(awsAccessKey, awsSecretKey, sessionToken)
-    val awsCredentialsProvider: AWSCredentialsProvider = new StaticCredentialsProvider(credentials)
+    val credentials = new AwsCredentials(AccessKeyID(awsAccessKey), SecretAccessKey(awsSecretKey))
     val region: String = "us-east-1"
     val service: String = "host"
 
     // Date
-    def clock(): DateTime = new DateTime().withDate(2011, 9, 9).withHourOfDay(23).withMinuteOfHour(36).withSecondOfMinute(0)
+    def clock(): LocalDateTime = LocalDateTime.of(2011, 9, 9, 23, 36, 0)
     // weird date : 09 Sep 2011 is a friday, not a monday
     val date = "Mon, 09 Sep 2011 23:36:00 GMT"
 
@@ -184,7 +178,7 @@ class AwsSignerSpec extends FlatSpec with Matchers {
 
     // WHEN
     // The request is signed
-    val signer: AwsSigner = AwsSigner(awsCredentialsProvider, region, service, clock)
+    val signer: AwsSigner = AwsSigner(credentials, region, service, clock)
     val signedHeaders = signer.getSignedHeaders(uri, method, queryParams, headers, payload)
 
     // THEN
