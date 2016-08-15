@@ -14,7 +14,7 @@ In your build.sbt file,
 ```sbt
 resolvers += Resolver.jcenterRepo
 
-libraryDependencies += "io.ticofab" %% "aws-request-signer" % "0.1.0"
+libraryDependencies += "io.ticofab" %% "aws-request-signer" % "0.2.0"
 ```
 
 Usage
