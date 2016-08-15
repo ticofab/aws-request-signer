@@ -1,10 +1,10 @@
 package io.ticofab
 
 import java.lang.String._
+import java.time.LocalDateTime
 
 import com.amazonaws.auth.{AWSCredentials, AWSCredentialsProvider, BasicAWSCredentials, BasicSessionCredentials}
 import com.amazonaws.internal.StaticCredentialsProvider
-import org.joda.time.DateTime
 import org.scalatest.{FlatSpec, Matchers}
 
 class AwsSignerSpec extends FlatSpec with Matchers {
@@ -30,7 +30,7 @@ class AwsSignerSpec extends FlatSpec with Matchers {
     val service = "host"
 
     // DATE
-    def clock(): DateTime = new DateTime().withDate(2011, 9, 9).withHourOfDay(23).withMinuteOfHour(36).withSecondOfMinute(0)
+    def clock(): LocalDateTime = LocalDateTime.of(2011, 9, 9, 23, 36, 0)
     // weird date : 09 Sep 2011 is a friday, not a monday
     val date = "Mon, 09 Sep 2011 23:36:00 GMT"
 
@@ -82,7 +82,7 @@ class AwsSignerSpec extends FlatSpec with Matchers {
     val service: String = "host"
 
     // Date
-    def clock(): DateTime = new DateTime().withDate(2011, 9, 9).withHourOfDay(23).withMinuteOfHour(36).withSecondOfMinute(0)
+    def clock(): LocalDateTime = LocalDateTime.of(2011, 9, 9, 23, 36, 0)
     // weird date : 09 Sep 2011 is a friday, not a monday
     val date = "Mon, 09 Sep 2011 23:36:00 GMT"
 
@@ -125,7 +125,7 @@ class AwsSignerSpec extends FlatSpec with Matchers {
     val service: String = "host"
 
     // Date
-    def clock(): DateTime = new DateTime().withDate(2011, 9, 9).withHourOfDay(23).withMinuteOfHour(36).withSecondOfMinute(0)
+    def clock(): LocalDateTime = LocalDateTime.of(2011, 9, 9, 23, 36, 0)
     // weird date : 09 Sep 2011 is a friday, not a monday
     val date: String = "20110909T233600Z"
 
@@ -170,7 +170,7 @@ class AwsSignerSpec extends FlatSpec with Matchers {
     val service: String = "host"
 
     // Date
-    def clock(): DateTime = new DateTime().withDate(2011, 9, 9).withHourOfDay(23).withMinuteOfHour(36).withSecondOfMinute(0)
+    def clock(): LocalDateTime = LocalDateTime.of(2011, 9, 9, 23, 36, 0)
     // weird date : 09 Sep 2011 is a friday, not a monday
     val date = "Mon, 09 Sep 2011 23:36:00 GMT"
 

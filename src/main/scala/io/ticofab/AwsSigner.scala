@@ -19,13 +19,13 @@ package io.ticofab
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.security.{InvalidKeyException, MessageDigest, NoSuchAlgorithmException}
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
 import com.amazonaws.auth.{AWSCredentials, AWSCredentialsProvider}
 import org.apache.commons.codec.binary.Hex
-import org.joda.time.DateTime
-import org.joda.time.format.{DateTimeFormat, ISODateTimeFormat}
 
 import scala.collection.immutable.TreeMap
 
@@ -35,7 +35,7 @@ import scala.collection.immutable.TreeMap
 case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
                      region: String,
                      service: String,
-                     clock: () => DateTime) {
+                     clock: () => LocalDateTime) {
 
   val BASE16MAP = Array[Char]('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f')
   val HMAC_SHA256 = "HmacSHA256"
@@ -58,7 +58,8 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
   val AUTHORIZATION = "Authorization"
   val SESSION_TOKEN = "x-amz-security-token"
   val DATE = "date"
-  val DATE_FORMATTER = DateTimeFormat.forPattern("yyyyMMdd'T'HHmmss'Z'")
+  val DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'")
+  val BASIC_DATE_FORMATTER = DateTimeFormatter.BASIC_ISO_DATE
 
   def getSignedHeaders(uri: String,
                        method: String,
@@ -69,7 +70,7 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
     def queryParamsString(queryParams: Map[String, String]) =
       queryParams.map(pair => pair._1 + "=" + URLEncoder.encode(pair._2, "UTF-8")).mkString("&")
 
-    def sign(stringToSign: String, now: DateTime, credentials: AWSCredentials): String = {
+    def sign(stringToSign: String, now: LocalDateTime, credentials: AWSCredentials): String = {
       def hmacSHA256(data: String, key: Array[Byte]): Array[Byte] = {
         try {
           val mac: Mac = Mac.getInstance(HMAC_SHA256)
@@ -81,9 +82,9 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
         }
       }
 
-      def getSignatureKey(now: DateTime, credentials: AWSCredentials): Array[Byte] = {
+      def getSignatureKey(now: LocalDateTime, credentials: AWSCredentials): Array[Byte] = {
         val kSecret: Array[Byte] = (AWS4 + credentials.getAWSSecretKey).getBytes(StandardCharsets.UTF_8)
-        val kDate: Array[Byte] = hmacSHA256(now.toString(ISODateTimeFormat.basicDate()), kSecret)
+        val kDate: Array[Byte] = hmacSHA256(now.format(BASIC_DATE_FORMATTER), kSecret)
         val kRegion: Array[Byte] = hmacSHA256(region, kDate)
         val kService: Array[Byte] = hmacSHA256(service, kRegion)
         hmacSHA256(AWS_4_REQUEST, kService)
@@ -96,13 +97,13 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
       if (header._1.equalsIgnoreCase(CONNECTION)) {
         CONNECTION + CLOSE
       } else if (header._1.equalsIgnoreCase(CONTENT_LENGTH) && header._2.equals(ZERO)) {
-        header._1.toLowerCase() + ':'
+        header._1.toLowerCase + ':'
       } else {
-        header._1.toLowerCase() + ':' + header._2
+        header._1.toLowerCase + ':' + header._2
       }
 
-    def getCredentialScope(now: DateTime): String =
-      now.toString(ISODateTimeFormat.basicDate()) + SLASH + region + SLASH + service + AWS4_REQUEST
+    def getCredentialScope(now: LocalDateTime): String =
+      now.format(BASIC_DATE_FORMATTER) + SLASH + region + SLASH + service + AWS4_REQUEST
 
     def hash(payload: Array[Byte]): Array[Byte] =
       try {
@@ -116,14 +117,14 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
     def toBase16(data: Array[Byte]): String =
       data.map(byte => (BASE16MAP(byte >> 4 & 0xF), BASE16MAP(byte & 0xF))).toList.flatMap(pair => List(pair._1, pair._2)).mkString
 
-    def createStringToSign(canonicalRequest: String, now: DateTime): String =
+    def createStringToSign(canonicalRequest: String, now: LocalDateTime): String =
       AWS4_HMAC_SHA256 + RETURN +
-        now.toString(DATE_FORMATTER) + RETURN +
+        now.format(DATE_FORMATTER) + RETURN +
         getCredentialScope(now) + RETURN +
         toBase16(hash(canonicalRequest.getBytes(StandardCharsets.UTF_8)))
 
     // evaluate current time from the provided clock
-    val now: DateTime = clock.apply()
+    val now: LocalDateTime = clock.apply()
 
     // signing credentials
     val credentials: AWSCredentials = credentialsProvider.getCredentials
@@ -132,7 +133,7 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
     for ((key, value) <- headers) result += key -> value
 
     if (!result.contains(DATE)) {
-      result += (X_AMZ_DATE -> now.toString(DATE_FORMATTER))
+      result += (X_AMZ_DATE -> now.format(DATE_FORMATTER))
     }
 
     // TODO
