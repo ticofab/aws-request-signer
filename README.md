@@ -28,7 +28,7 @@ You first need to instantiate the signer, for example:
 val awsCredentialProvider = new StaticCredentialsProvider(new BasicAWSCredentials("YOUR-ID", "YOUR-SECRET"))
 val service = "es"
 val region = "eu-central-1"
-def clock(): DateTime = DateTime.now
+def clock(): LocalDateTime = LocalDateTime.now
 val signer = AwsSigner(awsCredentialProvider, region, service, clock)
 ```
 
@@ -55,7 +55,7 @@ Dependencies
 License
 --------
 
-    Copyright 2015 Fabio Tiriticco - Fabway
+    Copyright 2016 Fabio Tiriticco - Fabway
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
