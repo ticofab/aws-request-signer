@@ -142,8 +142,8 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
     //      result.put(SESSION_TOKEN, ((AWSSessionCredentials) credentials).getSessionToken());
     //    }
 
-    val headersString: String = result.toMap.map(pair => headerAsString(pair) + RETURN).mkString
-    val signedHeaders: List[String] = result.toMap.map(pair => pair._1.toLowerCase).toList
+    val headersString: String = result.map(pair => headerAsString(pair) + RETURN).mkString
+    val signedHeaders: List[String] = result.map(pair => pair._1.toLowerCase).toList
 
     val signedHeaderKeys = signedHeaders.mkString(";")
     val canonicalRequest =
@@ -163,6 +163,6 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
 
     result += (AUTHORIZATION -> authorizationHeader)
 
-    result.toMap
+    result
   }
 }
