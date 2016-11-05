@@ -67,8 +67,10 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
                        headers: Map[String, String],
                        payload: Option[Array[Byte]]): Map[String, String] = {
 
+
     def queryParamsString(queryParams: Map[String, String]) =
-      queryParams.map(pair => pair._1 + "=" + URLEncoder.encode(pair._2, "UTF-8")).mkString("&")
+      queryParams.map { case (key,value) => key + "=" + URLEncoder.encode(value, StandardCharsets.UTF_8.toString) }.mkString("&")
+
 
     def sign(stringToSign: String, now: LocalDateTime, credentials: AWSCredentials): String = {
       def hmacSHA256(data: String, key: Array[Byte]): Array[Byte] = {
