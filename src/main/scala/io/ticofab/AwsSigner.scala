@@ -32,7 +32,33 @@ import scala.collection.immutable.TreeMap
 /**
   * Inspired By: https://github.com/inreachventures/aws-signing-request-interceptor
   */
-case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
+
+
+case object AwsSigner {
+
+  def apply(credentialsProvider: AWSCredentialsProvider,
+            region: String,
+            service: String,
+            clock: () => LocalDateTime): AwsSigner = new AwsSigner(credentialsProvider, region, service, clock)
+
+  def apply(awsAccessKeyId: String,
+            awsSecretKey: String,
+            region: String,
+            service: String,
+            clock: () => LocalDateTime): AwsSigner = {
+
+    val credentialsProvider = new AWSCredentialsProvider {
+      override def refresh(): Unit = ()
+      override def getCredentials: AWSCredentials = new AWSCredentials {
+        override def getAWSAccessKeyId: String = awsAccessKeyId
+        override def getAWSSecretKey: String = awsSecretKey
+      }
+    }
+    new AwsSigner(credentialsProvider, region, service, clock)
+  }
+}
+
+ class AwsSigner(credentialsProvider: AWSCredentialsProvider,
                      region: String,
                      service: String,
                      clock: () => LocalDateTime) {
@@ -69,7 +95,7 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
 
 
     def queryParamsString(queryParams: Map[String, String]) =
-      queryParams.map { case (key,value) => key + "=" + URLEncoder.encode(value, StandardCharsets.UTF_8.toString) }.mkString("&")
+      queryParams.map { case (key, value) => key + "=" + URLEncoder.encode(value, StandardCharsets.UTF_8.toString) }.mkString("&")
 
 
     def sign(stringToSign: String, now: LocalDateTime, credentials: AWSCredentials): String = {
@@ -150,11 +176,11 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
     val signedHeaderKeys = signedHeaders.mkString(";")
     val canonicalRequest =
       method + RETURN +
-      uri + RETURN +
-      queryParamsString(queryParams) + RETURN +
-      headersString + RETURN +
-      signedHeaderKeys + RETURN +
-      toBase16(hash(payload.getOrElse(EMPTY.getBytes(StandardCharsets.UTF_8))))
+        uri + RETURN +
+        queryParamsString(queryParams) + RETURN +
+        headersString + RETURN +
+        signedHeaderKeys + RETURN +
+        toBase16(hash(payload.getOrElse(EMPTY.getBytes(StandardCharsets.UTF_8))))
 
     val stringToSign = createStringToSign(canonicalRequest, now)
     val signature = sign(stringToSign, now, credentials)
