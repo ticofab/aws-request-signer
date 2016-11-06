@@ -3,8 +3,7 @@ package io.ticofab
 import java.lang.String._
 import java.time.LocalDateTime
 
-import com.amazonaws.auth.{AWSCredentials, AWSCredentialsProvider, BasicAWSCredentials, BasicSessionCredentials}
-import com.amazonaws.internal.StaticCredentialsProvider
+import com.amazonaws.auth._
 import org.scalatest.{FlatSpec, Matchers}
 
 class AwsSignerSpec extends FlatSpec with Matchers {
@@ -25,7 +24,7 @@ class AwsSignerSpec extends FlatSpec with Matchers {
     val awsAccessKey = "AKIDEXAMPLE"
     val awsSecretKey = "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY"
     val credentials: AWSCredentials = new BasicAWSCredentials(awsAccessKey, awsSecretKey)
-    val awsCredentialsProvider: AWSCredentialsProvider = new StaticCredentialsProvider(credentials)
+    val awsCredentialsProvider: AWSCredentialsProvider = new AWSStaticCredentialsProvider(credentials)
     val region = "us-east-1"
     val service = "host"
 
@@ -77,7 +76,7 @@ class AwsSignerSpec extends FlatSpec with Matchers {
     val awsAccessKey: String = "AKIDEXAMPLE"
     val awsSecretKey: String = "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY"
     val credentials: AWSCredentials = new BasicAWSCredentials(awsAccessKey, awsSecretKey)
-    val awsCredentialsProvider: AWSCredentialsProvider = new StaticCredentialsProvider(credentials)
+    val awsCredentialsProvider: AWSCredentialsProvider = new AWSStaticCredentialsProvider(credentials)
     val region: String = "us-east-1"
     val service: String = "host"
 
@@ -120,7 +119,7 @@ class AwsSignerSpec extends FlatSpec with Matchers {
     val awsAccessKey: String = "AKIDEXAMPLE"
     val awsSecretKey: String = "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY"
     val credentials: AWSCredentials = new BasicAWSCredentials(awsAccessKey, awsSecretKey)
-    val awsCredentialsProvider: AWSCredentialsProvider = new StaticCredentialsProvider(credentials)
+    val awsCredentialsProvider: AWSCredentialsProvider = new AWSStaticCredentialsProvider(credentials)
     val region: String = "us-east-1"
     val service: String = "host"
 
@@ -165,7 +164,7 @@ class AwsSignerSpec extends FlatSpec with Matchers {
     val awsSecretKey: String = "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY"
     val sessionToken: String = "AKIDEXAMPLESESSION"
     val credentials: AWSCredentials = new BasicSessionCredentials(awsAccessKey, awsSecretKey, sessionToken)
-    val awsCredentialsProvider: AWSCredentialsProvider = new StaticCredentialsProvider(credentials)
+    val awsCredentialsProvider: AWSCredentialsProvider = new AWSStaticCredentialsProvider(credentials)
     val region: String = "us-east-1"
     val service: String = "host"
 
