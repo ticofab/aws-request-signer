@@ -9,12 +9,12 @@ I originally needed this library to support AWS' [Elasticsearch Service](https:/
 Import via SBT
 --------------
 
-In your build.sbt file,
+Currently available only for scala 2.11. In your build.sbt file,
 
 ```sbt
 resolvers += Resolver.jcenterRepo
 
-libraryDependencies += "io.ticofab" %% "aws-request-signer" % "0.2.0"
+libraryDependencies += "io.ticofab" % "aws-request-signer_2.11" % "0.3.0"
 ```
 
 Usage
