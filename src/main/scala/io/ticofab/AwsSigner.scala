@@ -164,11 +164,9 @@ case object AwsSigner {
       result += (X_AMZ_DATE -> now.format(DATE_FORMATTER))
     }
 
-    // TODO
-    //    if (AWSSessionCredentials.class.isAssignableFrom(credentials.getClass()))
-    //    {
-    //      result.put(SESSION_TOKEN, ((AWSSessionCredentials) credentials).getSessionToken());
-    //    }
+    if (credentials.isInstanceOf[AWSSessionCredentials]){
+      result += (SESSION_TOKEN -> credentials.asInstanceOf[AWSSessionCredentials].getSessionToken() )
+    }
 
     val headersString: String = result.map(pair => headerAsString(pair) + RETURN).mkString
     val signedHeaders: List[String] = result.map(pair => pair._1.toLowerCase).toList
