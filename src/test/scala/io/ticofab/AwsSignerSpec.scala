@@ -21,6 +21,10 @@ class AwsSignerSpec extends FlatSpec with Matchers {
   val CredentialsWithSession: AWSCredentials = new BasicSessionCredentials(AwsAccessKey, AwsSecretKey, SessionToken)
   val AwsCredentialsProviderWithSession: AWSCredentialsProvider = new AWSStaticCredentialsProvider(CredentialsWithSession)
 
+  // Test Credentials using profile for testing with session token.
+  val ProfileCredentialsWithSession: AWSCredentials = new ProfileCredentialsProvider(System.getProperty("user.home")+ "/.aws/credentials","default").getCredentials()
+  val awsProfileCredentialsProviderWithSession: AWSCredentialsProvider = new AWSStaticCredentialsProvider(CredentialsWithSession)
+  
   // Static clock to ensure deterministic test results.
   val clock: () => LocalDateTime = () => LocalDateTime.of(2011, 9, 9, 23, 36, 0)
 
