@@ -15,10 +15,10 @@ crossScalaVersions := Seq("2.10.6", "2.11.7", "2.11.8")
 libraryDependencies ++= Seq(
 
   // test framework
-  "org.scalatest" %% "scalatest" % "2.2.4" % "test",
+  "org.scalatest" %% "scalatest" % "3.0.0" % "test",
 
   // aws java SDK
-  "com.amazonaws" % "aws-java-sdk-core" % "1.10.19"
+  "com.amazonaws" % "aws-java-sdk-core" % "1.11.51"
 
 )
 

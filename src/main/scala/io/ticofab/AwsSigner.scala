@@ -32,7 +32,33 @@ import scala.collection.immutable.TreeMap
 /**
   * Inspired By: https://github.com/inreachventures/aws-signing-request-interceptor
   */
-case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
+
+
+case object AwsSigner {
+
+  def apply(credentialsProvider: AWSCredentialsProvider,
+            region: String,
+            service: String,
+            clock: () => LocalDateTime): AwsSigner = new AwsSigner(credentialsProvider, region, service, clock)
+
+  def apply(awsAccessKeyId: String,
+            awsSecretKey: String,
+            region: String,
+            service: String,
+            clock: () => LocalDateTime): AwsSigner = {
+
+    val credentialsProvider = new AWSCredentialsProvider {
+      override def refresh(): Unit = ()
+      override def getCredentials: AWSCredentials = new AWSCredentials {
+        override def getAWSAccessKeyId: String = awsAccessKeyId
+        override def getAWSSecretKey: String = awsSecretKey
+      }
+    }
+    new AwsSigner(credentialsProvider, region, service, clock)
+  }
+}
+
+ class AwsSigner(credentialsProvider: AWSCredentialsProvider,
                      region: String,
                      service: String,
                      clock: () => LocalDateTime) {
@@ -67,8 +93,10 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
                        headers: Map[String, String],
                        payload: Option[Array[Byte]]): Map[String, String] = {
 
+
     def queryParamsString(queryParams: Map[String, String]) =
-      queryParams.map(pair => pair._1 + "=" + URLEncoder.encode(pair._2, "UTF-8")).mkString("&")
+      queryParams.map { case (key, value) => key + "=" + URLEncoder.encode(value, StandardCharsets.UTF_8.toString) }.mkString("&")
+
 
     def sign(stringToSign: String, now: LocalDateTime, credentials: AWSCredentials): String = {
       def hmacSHA256(data: String, key: Array[Byte]): Array[Byte] = {
@@ -93,10 +121,11 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
       Hex.encodeHexString(hmacSHA256(stringToSign, getSignatureKey(now, credentials)))
     }
 
-    def headerAsString(header: (String, Object)): String =
+    def headerAsString(header: (String, Object), method: String): String =
       if (header._1.equalsIgnoreCase(CONNECTION)) {
         CONNECTION + CLOSE
-      } else if (header._1.equalsIgnoreCase(CONTENT_LENGTH) && header._2.equals(ZERO)) {
+      } else if (header._1.equalsIgnoreCase(CONTENT_LENGTH) && header._2.equals(ZERO) && method.equalsIgnoreCase("DELETE")) {
+
         header._1.toLowerCase + ':'
       } else {
         header._1.toLowerCase + ':' + header._2
@@ -136,23 +165,21 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
       result += (X_AMZ_DATE -> now.format(DATE_FORMATTER))
     }
 
-    // TODO
-    //    if (AWSSessionCredentials.class.isAssignableFrom(credentials.getClass()))
-    //    {
-    //      result.put(SESSION_TOKEN, ((AWSSessionCredentials) credentials).getSessionToken());
-    //    }
+    if (credentials.isInstanceOf[AWSSessionCredentials]){
+      result += (SESSION_TOKEN -> credentials.asInstanceOf[AWSSessionCredentials].getSessionToken() )
+    }
 
-    val headersString: String = result.toMap.map(pair => headerAsString(pair) + RETURN).mkString
-    val signedHeaders: List[String] = result.toMap.map(pair => pair._1.toLowerCase).toList
+    val headersString: String = result.map(pair => headerAsString(pair, method) + RETURN).mkString
+    val signedHeaders: List[String] = result.map(pair => pair._1.toLowerCase).toList
 
     val signedHeaderKeys = signedHeaders.mkString(";")
     val canonicalRequest =
       method + RETURN +
-      uri + RETURN +
-      queryParamsString(queryParams) + RETURN +
-      headersString + RETURN +
-      signedHeaderKeys + RETURN +
-      toBase16(hash(payload.getOrElse(EMPTY.getBytes(StandardCharsets.UTF_8))))
+        uri + RETURN +
+        queryParamsString(queryParams) + RETURN +
+        headersString + RETURN +
+        signedHeaderKeys + RETURN +
+        toBase16(hash(payload.getOrElse(EMPTY.getBytes(StandardCharsets.UTF_8))))
 
     val stringToSign = createStringToSign(canonicalRequest, now)
     val signature = sign(stringToSign, now, credentials)
@@ -163,6 +190,6 @@ case class AwsSigner(credentialsProvider: AWSCredentialsProvider,
 
     result += (AUTHORIZATION -> authorizationHeader)
 
-    result.toMap
+    result
   }
 }
