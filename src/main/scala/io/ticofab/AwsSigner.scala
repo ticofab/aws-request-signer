@@ -167,8 +167,8 @@ class AwsSigner(credentialsProvider: AWSCredentialsProvider,
       result += (X_AMZ_DATE -> now.format(DATE_FORMATTER))
     }
 
-    if (credentials.isInstanceOf[AWSSessionCredentials]) {
-      result += (SESSION_TOKEN -> credentials.asInstanceOf[AWSSessionCredentials].getSessionToken)
+    credentials match {
+      case awsSessionCredentials: AWSSessionCredentials => result += (SESSION_TOKEN -> awsSessionCredentials.getSessionToken)
     }
 
     val headersString: String = result.map(pair => headerAsString(pair, method) + RETURN).mkString
