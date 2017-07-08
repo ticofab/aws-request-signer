@@ -4,6 +4,7 @@ import java.lang.String._
 import java.time.LocalDateTime
 
 import com.amazonaws.auth._
+import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import org.scalatest.{FlatSpec, Matchers}
 
 class AwsSignerSpec extends FlatSpec with Matchers {
