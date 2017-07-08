@@ -121,10 +121,11 @@ case object AwsSigner {
       Hex.encodeHexString(hmacSHA256(stringToSign, getSignatureKey(now, credentials)))
     }
 
-    def headerAsString(header: (String, Object)): String =
+    def headerAsString(header: (String, Object), method: String): String =
       if (header._1.equalsIgnoreCase(CONNECTION)) {
         CONNECTION + CLOSE
-      } else if (header._1.equalsIgnoreCase(CONTENT_LENGTH) && header._2.equals(ZERO)) {
+      } else if (header._1.equalsIgnoreCase(CONTENT_LENGTH) && header._2.equals(ZERO) && method.equalsIgnoreCase("DELETE")) {
+
         header._1.toLowerCase + ':'
       } else {
         header._1.toLowerCase + ':' + header._2
@@ -168,7 +169,7 @@ case object AwsSigner {
       result += (SESSION_TOKEN -> credentials.asInstanceOf[AWSSessionCredentials].getSessionToken() )
     }
 
-    val headersString: String = result.map(pair => headerAsString(pair) + RETURN).mkString
+    val headersString: String = result.map(pair => headerAsString(pair, method) + RETURN).mkString
     val signedHeaders: List[String] = result.map(pair => pair._1.toLowerCase).toList
 
     val signedHeaderKeys = signedHeaders.mkString(";")
