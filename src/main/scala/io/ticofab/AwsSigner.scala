@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
-import com.amazonaws.auth.{AWSCredentials, AWSCredentialsProvider}
+import com.amazonaws.auth.{AWSCredentials, AWSCredentialsProvider, AWSSessionCredentials}
 import org.apache.commons.codec.binary.Hex
 
 import scala.collection.immutable.TreeMap
@@ -49,8 +49,10 @@ case object AwsSigner {
 
     val credentialsProvider = new AWSCredentialsProvider {
       override def refresh(): Unit = ()
+
       override def getCredentials: AWSCredentials = new AWSCredentials {
         override def getAWSAccessKeyId: String = awsAccessKeyId
+
         override def getAWSSecretKey: String = awsSecretKey
       }
     }
@@ -58,10 +60,10 @@ case object AwsSigner {
   }
 }
 
- class AwsSigner(credentialsProvider: AWSCredentialsProvider,
-                     region: String,
-                     service: String,
-                     clock: () => LocalDateTime) {
+class AwsSigner(credentialsProvider: AWSCredentialsProvider,
+                region: String,
+                service: String,
+                clock: () => LocalDateTime) {
 
   val BASE16MAP = Array[Char]('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f')
   val HMAC_SHA256 = "HmacSHA256"
@@ -165,8 +167,8 @@ case object AwsSigner {
       result += (X_AMZ_DATE -> now.format(DATE_FORMATTER))
     }
 
-    if (credentials.isInstanceOf[AWSSessionCredentials]){
-      result += (SESSION_TOKEN -> credentials.asInstanceOf[AWSSessionCredentials].getSessionToken() )
+    if (credentials.isInstanceOf[AWSSessionCredentials]) {
+      result += (SESSION_TOKEN -> credentials.asInstanceOf[AWSSessionCredentials].getSessionToken)
     }
 
     val headersString: String = result.map(pair => headerAsString(pair, method) + RETURN).mkString
