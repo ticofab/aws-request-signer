@@ -27,13 +27,11 @@ import javax.crypto.spec.SecretKeySpec
 import com.amazonaws.auth.{AWSCredentials, AWSCredentialsProvider, AWSSessionCredentials}
 import org.apache.commons.codec.binary.Hex
 
-import scala.collection.immutable.TreeMap
+import scala.collection.immutable.{ListMap, TreeMap}
 
 /**
   * Inspired By: https://github.com/inreachventures/aws-signing-request-interceptor
   */
-
-
 case object AwsSigner {
 
   def apply(credentialsProvider: AWSCredentialsProvider,
@@ -95,10 +93,13 @@ class AwsSigner(credentialsProvider: AWSCredentialsProvider,
                        headers: Map[String, String],
                        payload: Option[Array[Byte]]): Map[String, String] = {
 
+    def queryParamsString(queryParams: Map[String, String]) = {
+      // sort params by key in ascending order
+      val orderedParams = ListMap(queryParams.toSeq.sortWith(_._1 < _._1): _*)
 
-    def queryParamsString(queryParams: Map[String, String]) =
-      queryParams.map { case (key, value) => key + "=" + URLEncoder.encode(value, StandardCharsets.UTF_8.toString) }.mkString("&")
-
+      // encode params
+      orderedParams.map { case (key, value) => key + "=" + URLEncoder.encode(value, StandardCharsets.UTF_8.toString) }.mkString("&")
+    }
 
     def sign(stringToSign: String, now: LocalDateTime, credentials: AWSCredentials): String = {
       def hmacSHA256(data: String, key: Array[Byte]): Array[Byte] = {
@@ -127,7 +128,6 @@ class AwsSigner(credentialsProvider: AWSCredentialsProvider,
       if (header._1.equalsIgnoreCase(CONNECTION)) {
         CONNECTION + CLOSE
       } else if (header._1.equalsIgnoreCase(CONTENT_LENGTH) && header._2.equals(ZERO) && method.equalsIgnoreCase("DELETE")) {
-
         header._1.toLowerCase + ':'
       } else {
         header._1.toLowerCase + ':' + header._2
@@ -168,7 +168,8 @@ class AwsSigner(credentialsProvider: AWSCredentialsProvider,
     }
 
     credentials match {
-      case awsSessionCredentials: AWSSessionCredentials => result += (SESSION_TOKEN -> awsSessionCredentials.getSessionToken)
+      case asc: AWSSessionCredentials => result += (SESSION_TOKEN -> asc.getSessionToken)
+      case _ => // do nothing
     }
 
     val headersString: String = result.map(pair => headerAsString(pair, method) + RETURN).mkString

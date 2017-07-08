@@ -15,7 +15,7 @@ class AwsSignerSpec extends FlatSpec with Matchers {
   val Credentials: AWSCredentials = new BasicAWSCredentials(AwsAccessKey, AwsSecretKey)
   val AwsCredentialsProvider: AWSCredentialsProvider = new AWSStaticCredentialsProvider(Credentials)
   val Region = "us-east-1"
-  val Service = "host"
+  val Service = "service"
 
   // Test Credentials for testing with session token.
   val SessionToken: String = "AKIDEXAMPLESESSION"
@@ -39,15 +39,6 @@ class AwsSignerSpec extends FlatSpec with Matchers {
   val emptyPayload: Option[Array[Byte]] = None
   val hostHeader: Map[String, String] = Map("Host" -> Host)
 
-  /**
-    * Test case given in AWS Signing Test Suite (http://docs.aws.amazon.com/general/latest/gr/signature-v4-test-suite.html)
-    * (get-vanilla.*)
-    *
-    * GET / http/1.1
-    * Date:Mon, 09 Sep 2011 23:36:00 GMT
-    * Host:host.foo.com
-    *
-    */
   "AwsSigner" should "pass the GET vanilla test" in {
 
     // DATE
@@ -61,31 +52,56 @@ class AwsSignerSpec extends FlatSpec with Matchers {
     val signedHeaders = signer.getSignedHeaders(Uri, GetMethod, EmptyQueryParams, headers, emptyPayload)
 
     // The signature must match the expected signature
-    val expectedSignature = "b27ccfbfa7df52a200ff74193ca6e32d4b48b8856fab7ebf1c595d0670a7e470"
+    val expectedSignature = "b0a671385ef1f9513c15c34d206c7d83e3a4d848c43603569eca2760ee75c3b3"
     val expectedAuthorizationHeader = String.format(
       "AWS4-HMAC-SHA256 Credential=%s/20110909/%s/%s/aws4_request, SignedHeaders=date;host, Signature=%s",
       AwsAccessKey, Region, Service, expectedSignature
     )
 
-    val caseInsensitiveSignedHeaders = signedHeaders
-    assert(caseInsensitiveSignedHeaders.contains("Authorization"))
-    assert(caseInsensitiveSignedHeaders.getOrElse("Authorization", "").equals(expectedAuthorizationHeader))
-    assert(caseInsensitiveSignedHeaders.contains("Host"))
-    assert(caseInsensitiveSignedHeaders.getOrElse("Host", "").equals(Host))
-    assert(caseInsensitiveSignedHeaders.contains("Date"))
-    assert(caseInsensitiveSignedHeaders.getOrElse("Date", "").equals(date))
-    assert(!caseInsensitiveSignedHeaders.contains("X-Amz-Date"))
+    assert(signedHeaders.contains("Authorization"))
+    assert(signedHeaders.getOrElse("Authorization", "").equals(expectedAuthorizationHeader))
+    assert(signedHeaders.contains("Host"))
+    assert(signedHeaders.getOrElse("Host", "").equals(Host))
+    assert(signedHeaders.contains("Date"))
+    assert(signedHeaders.getOrElse("Date", "").equals(date))
+    assert(!signedHeaders.contains("X-Amz-Date"))
   }
 
   /**
     * Test case given in AWS Signing Test Suite (http://docs.aws.amazon.com/general/latest/gr/signature-v4-test-suite.html)
-    * (post-vanilla-query.*)
-    *
-    * POST /?foo=bar http/1.1
-    * Date:Mon, 09 Sep 2011 23:36:00 GMT
-    * Host:host.foo.com
-    *
     */
+  it should "pass the GET vanilla test with parameters" in {
+
+    // DATE
+    val xAmzDate = "20150830T123600Z"
+
+    // HOST
+    val host = "example.amazonaws.com"
+
+    // Header for HTTP Request.
+    val headers: Map[String, String] = Map("X-Amz-Date" -> xAmzDate, "Host" -> host)
+
+    // parameters for HTTP request
+    val params: Map[String, String] = EmptyQueryParams ++ Map("Param2" -> "value2", "Param1" -> "value1")
+
+    val signer: AwsSigner = AwsSigner(AwsCredentialsProvider, Region, Service, () => LocalDateTime.of(2015, 8, 30, 12, 36, 0))
+    val signedHeaders = signer.getSignedHeaders(Uri, GetMethod, params, headers, emptyPayload)
+
+    // The signature must match the expected signature
+    val expectedSignature = "b97d918cfa904a5beff61c982a1b6f458b799221646efd99d3219ec94cdf2500"
+    val expectedAuthorizationHeader = String.format(
+      "AWS4-HMAC-SHA256 Credential=%s/20150830/%s/%s/aws4_request, SignedHeaders=host;x-amz-date, Signature=%s",
+      AwsAccessKey, Region, Service, expectedSignature
+    )
+
+    assert(signedHeaders.contains("Authorization"))
+    assert(signedHeaders.getOrElse("Authorization", "").equals(expectedAuthorizationHeader))
+    assert(signedHeaders.contains("Host"))
+    assert(signedHeaders.getOrElse("Host", "").equals(host))
+    assert(signedHeaders.contains("X-Amz-Date"))
+    assert(signedHeaders.getOrElse("X-Amz-Date", "").equals(xAmzDate))
+  }
+
   it should "pass the POST query vanilla test" in {
 
     // weird date : 09 Sep 2011 is a friday, not a monday
@@ -102,17 +118,17 @@ class AwsSignerSpec extends FlatSpec with Matchers {
 
     // THEN
     // The signature must match the expected signature
-    val expectedSignature: String = "b6e3b79003ce0743a491606ba1035a804593b0efb1e20a11cba83f8c25a57a92"
-    val expectedAuthorizationHeader: String = format("AWS4-HMAC-SHA256 Credential=%s/20110909/%s/%s/aws4_request, SignedHeaders=date;host, Signature=%s", AwsAccessKey, Region, Service, expectedSignature)
+    val expectedSignature: String = "ffa9577fe836168407d8a9afce6d75e903de636017cb60bb37f4b094ecfb1c27"
+    val expectedAuthorizationHeader: String = format("AWS4-HMAC-SHA256 Credential=%s/20110909/%s/%s/aws4_request, SignedHeaders=date;host, Signature=%s",
+      AwsAccessKey, Region, Service, expectedSignature)
 
-    val caseInsensitiveSignedHeaders = signedHeaders
-    assert(caseInsensitiveSignedHeaders.contains("Authorization"))
-    assert(caseInsensitiveSignedHeaders.getOrElse("Authorization", "").equals(expectedAuthorizationHeader))
-    assert(caseInsensitiveSignedHeaders.contains("Host"))
-    assert(caseInsensitiveSignedHeaders.getOrElse("Host", "").equals(Host))
-    assert(caseInsensitiveSignedHeaders.contains("Date"))
-    assert(caseInsensitiveSignedHeaders.getOrElse("Date", "").equals(date))
-    assert(!caseInsensitiveSignedHeaders.contains("X-Amz-Date"))
+    assert(signedHeaders.contains("Authorization"))
+    assert(signedHeaders.getOrElse("Authorization", "").equals(expectedAuthorizationHeader))
+    assert(signedHeaders.contains("Host"))
+    assert(signedHeaders.getOrElse("Host", "").equals(Host))
+    assert(signedHeaders.contains("Date"))
+    assert(signedHeaders.getOrElse("Date", "").equals(date))
+    assert(!signedHeaders.contains("X-Amz-Date"))
   }
 
   it should "pass the GET vanilla test without Date Header" in {
@@ -130,17 +146,16 @@ class AwsSignerSpec extends FlatSpec with Matchers {
 
     // THEN
     // The signature must match the expected signature
-    val expectedSignature: String = "904f8c568bca8bd2618b9241a7f2a8d90f279e717fd0f6727af189668b040151"
+    val expectedSignature: String = "922abe18f0e78e55d69b34458c61e73134ab710adcb9a3257b638d70e2363ce1"
     val expectedAuthorizationHeader: String = String.format("AWS4-HMAC-SHA256 Credential=%s/20110909/%s/%s/aws4_request, SignedHeaders=host;x-amz-date, Signature=%s", AwsAccessKey, Region, Service, expectedSignature)
 
-    val caseInsensitiveSignedHeaders = signedHeaders
-    assert(caseInsensitiveSignedHeaders.contains("Authorization"))
-    assert(caseInsensitiveSignedHeaders.getOrElse("Authorization", "").equals(expectedAuthorizationHeader))
-    assert(caseInsensitiveSignedHeaders.contains("Host"))
-    assert(caseInsensitiveSignedHeaders.getOrElse("Host", "").equals(Host))
-    assert(caseInsensitiveSignedHeaders.contains("X-Amz-Date"))
-    assert(caseInsensitiveSignedHeaders.getOrElse("X-Amz-Date", "").equals(date))
-    assert(!caseInsensitiveSignedHeaders.contains("Date"))
+    assert(signedHeaders.contains("Authorization"))
+    assert(signedHeaders.getOrElse("Authorization", "").equals(expectedAuthorizationHeader))
+    assert(signedHeaders.contains("Host"))
+    assert(signedHeaders.getOrElse("Host", "").equals(Host))
+    assert(signedHeaders.contains("X-Amz-Date"))
+    assert(signedHeaders.getOrElse("X-Amz-Date", "").equals(date))
+    assert(!signedHeaders.contains("Date"))
   }
 
   it should "pass the GET vanilla test with temp credentials" in {
@@ -158,18 +173,17 @@ class AwsSignerSpec extends FlatSpec with Matchers {
 
     // THEN
     // The signature must match the expected signature
-    val expectedSignature: String = "43abd9e63c148feb91c43fe2c9734eb44b7eb16078d484d3ff9b6249b62fdc60"
+    val expectedSignature: String = "78448a6ffad33b798ea2bb717fe5c3ef849a1b726ed1e692f4b5635b95070fb3"
     val expectedAuthorizationHeader: String = format("AWS4-HMAC-SHA256 Credential=%s/20110909/%s/%s/aws4_request, SignedHeaders=date;host;x-amz-security-token, Signature=%s", AwsAccessKey, Region, Service, expectedSignature)
 
-    val caseInsensitiveSignedHeaders = signedHeaders
-    assert(caseInsensitiveSignedHeaders.contains("Authorization"))
-    assert(caseInsensitiveSignedHeaders.getOrElse("Authorization", "").equals(expectedAuthorizationHeader))
-    assert(caseInsensitiveSignedHeaders.contains("Host"))
-    assert(caseInsensitiveSignedHeaders.getOrElse("Host", "").equals(Host))
-    assert(caseInsensitiveSignedHeaders.contains("Date"))
-    assert(caseInsensitiveSignedHeaders.getOrElse("Date", "").equals(date))
-    assert(!caseInsensitiveSignedHeaders.contains("X-Amz-Date"))
-    assert(caseInsensitiveSignedHeaders.contains("X-Amz-Security-Token"))
-    assert(caseInsensitiveSignedHeaders.getOrElse("X-Amz-Security-Token", "").equals(SessionToken))
+    assert(signedHeaders.contains("Authorization"))
+    assert(signedHeaders.getOrElse("Authorization", "").equals(expectedAuthorizationHeader))
+    assert(signedHeaders.contains("Host"))
+    assert(signedHeaders.getOrElse("Host", "").equals(Host))
+    assert(signedHeaders.contains("Date"))
+    assert(signedHeaders.getOrElse("Date", "").equals(date))
+    assert(!signedHeaders.contains("X-Amz-Date"))
+    assert(signedHeaders.contains("X-Amz-Security-Token"))
+    assert(signedHeaders.getOrElse("X-Amz-Security-Token", "").equals(SessionToken))
   }
 }
