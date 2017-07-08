@@ -14,7 +14,7 @@ Currently available only for scala 2.11. In your build.sbt file,
 ```sbt
 resolvers += Resolver.jcenterRepo
 
-libraryDependencies += "io.ticofab" % "aws-request-signer_2.11" % "0.3.0"
+libraryDependencies += "io.ticofab" % "aws-request-signer_2.11" % "0.4.0"
 ```
 
 Usage
@@ -49,13 +49,13 @@ Check the examples in the test folder of this project. Once you have the headers
 Dependencies
 ------------
 
-* [AWS Java SDK][1]
-* [ScalaTest][2]
+* [AWS Java SDK](https://aws.amazon.com/sdk-for-java/)
+* [ScalaTest](http://www.scalatest.org)
 
 License
 --------
 
-    Copyright 2016 Fabio Tiriticco - Fabway
+    Copyright 2016, 2017 Fabio Tiriticco - Fabway
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -68,7 +68,3 @@ License
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-
-[1]: https://aws.amazon.com/sdk-for-java/
-[2]: http://www.scalatest.org 
-

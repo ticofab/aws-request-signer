@@ -1,11 +1,18 @@
 Change Log
 ==========
 
+Version 0.4.0 *(2017-07-08)*
+----------------------------
+ 
+ * Added support for AWS Session Token - [Niket Patel](https://github.com/patelniketm)
+ * Fix incorrectly set Content-Length for DELETE method - [Charlie Rumley](https://github.com/charles-rumley).
+
+
 Version 0.3.0 *(2017-05-02)*
 ----------------------------
  
- * Minor but still great improvements by [Ivan Morozov](https://github.com/allquantor)
- * Updated README with timezone in example instantiation [Charlie Rumley](https://github.com/charles-rumley).
+ * Minor but still great improvements - [Ivan Morozov](https://github.com/allquantor)
+ * Updated README with timezone in example instantiation - [Charlie Rumley](https://github.com/charles-rumley).
 
 
 Version 0.2.0 *(2016-15-08)*
