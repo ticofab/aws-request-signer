@@ -23,9 +23,10 @@ class AwsSignerSpec extends FlatSpec with Matchers {
   val AwsCredentialsProviderWithSession: AWSCredentialsProvider = new AWSStaticCredentialsProvider(CredentialsWithSession)
 
   // Test Credentials using profile for testing with session token.
-  val ProfileCredentialsWithSession: AWSCredentials = new ProfileCredentialsProvider(System.getProperty("user.home")+ "/.aws/credentials","default").getCredentials()
+  val credentialsPath = getClass.getResource("/credentials").getPath
+  val ProfileCredentialsWithSession: AWSCredentials = new ProfileCredentialsProvider(credentialsPath.toString, "default").getCredentials
   val awsProfileCredentialsProviderWithSession: AWSCredentialsProvider = new AWSStaticCredentialsProvider(CredentialsWithSession)
-  
+
   // Static clock to ensure deterministic test results.
   val clock: () => LocalDateTime = () => LocalDateTime.of(2011, 9, 9, 23, 36, 0)
 
@@ -142,8 +143,7 @@ class AwsSignerSpec extends FlatSpec with Matchers {
     assert(!caseInsensitiveSignedHeaders.contains("Date"))
   }
 
-  // TODO: ignoring this test as the session token is not implemented yet
-  ignore should "pass the GET vanilla test with temp credentials" in {
+  it should "pass the GET vanilla test with temp credentials" in {
 
     // weird date : 09 Sep 2011 is a friday, not a monday
     val date = "Mon, 09 Sep 2011 23:36:00 GMT"
