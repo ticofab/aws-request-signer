@@ -1,12 +1,13 @@
 Change Log
 ==========
 
-Version 0.4.0 *(2017-07-08)*
+Version 0.4.1 *(2017-07-08)*
 ----------------------------
- 
+
+ * Fix [#9](https://github.com/ticofab/aws-request-signer/issues/9) (query param order) 
  * Added support for AWS Session Token - [Niket Patel](https://github.com/patelniketm)
  * Fix incorrectly set Content-Length for DELETE method - [Charlie Rumley](https://github.com/charles-rumley).
-
+ 
 
 Version 0.3.0 *(2017-05-02)*
 ----------------------------
