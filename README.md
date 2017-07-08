@@ -14,7 +14,7 @@ Currently available only for scala 2.11. In your build.sbt file,
 ```sbt
 resolvers += Resolver.jcenterRepo
 
-libraryDependencies += "io.ticofab" % "aws-request-signer_2.11" % "0.4.0"
+libraryDependencies += "io.ticofab" % "aws-request-signer_2.11" % "0.4.1"
 ```
 
 Usage

@@ -2,7 +2,7 @@ name := """aws-request-signer"""
 
 organization := "io.ticofab"
 
-version := "0.4.0"
+version := "0.4.1"
 
 licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 
