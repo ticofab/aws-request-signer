@@ -14,7 +14,7 @@ Currently available only for scala 2.11. In your build.sbt file,
 ```sbt
 resolvers += Resolver.jcenterRepo
 
-libraryDependencies += "io.ticofab" % "aws-request-signer_2.11" % "0.4.1"
+libraryDependencies += "io.ticofab" %% "aws-request-signer" % "0.4.1"
 ```
 
 Usage
@@ -29,7 +29,7 @@ val awsCredentialProvider = new StaticCredentialsProvider(new BasicAWSCredential
 val service = "es"
 val region = "eu-central-1"
 def clock(): LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
-val signer = AwsSigner(awsCredentialProvider, region, service, clock)
+val signer = io.ticofab.AwsSigner(awsCredentialProvider, region, service, clock)
 ```
 
 Then use it for each request, via
