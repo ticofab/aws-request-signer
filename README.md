@@ -1,4 +1,4 @@
-aws-request-signer
+AWS Request Signer
 ==================
 
 Helper to evaluate the signing headers for HTTP requests to Amazon Web Services. This is a Scala port of (part of) the Java [aws-signing-request-interceptor](https://github.com/inreachventures/aws-signing-request-interceptor).
@@ -9,12 +9,18 @@ I originally needed this library to support AWS' [Elasticsearch Service](https:/
 Import via SBT
 --------------
 
-Currently available only for scala 2.11. In your build.sbt file,
+Currently available for scala 2.10, 2.11 and 2.12. In your build.sbt file,
 
 ```sbt
 resolvers += Resolver.jcenterRepo
 
-libraryDependencies += "io.ticofab" % "aws-request-signer_2.11" % "0.4.1"
+libraryDependencies += "io.ticofab" %% "aws-request-signer" % "0.5.0"
+```
+
+Sometimes Bintray has trouble syncing with JCenter (I'm looking into it). Shall you have issues with resolving, try adding the resolver to my personal repository:
+
+```sbt
+resolvers += Resolver.bintrayRepo("ticofab", "maven")
 ```
 
 Usage
@@ -29,7 +35,7 @@ val awsCredentialProvider = new StaticCredentialsProvider(new BasicAWSCredential
 val service = "es"
 val region = "eu-central-1"
 def clock(): LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
-val signer = AwsSigner(awsCredentialProvider, region, service, clock)
+val signer = io.ticofab.AwsSigner(awsCredentialProvider, region, service, clock)
 ```
 
 Then use it for each request, via
