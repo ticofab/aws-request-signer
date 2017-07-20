@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 0.5.1 *(2017-07-20)*
+----------------------------
+
+* Fix [#15](https://github.com/ticofab/aws-request-signer/issues/15) - thanks to [abankowski](https://github.com/abankowski)
+
 Version 0.5.0 *(2017-07-15)*
 ----------------------------
 
