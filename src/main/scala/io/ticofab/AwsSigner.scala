@@ -127,7 +127,7 @@ class AwsSigner(credentialsProvider: AWSCredentialsProvider,
     def headerAsString(header: (String, Object), method: String): String =
       if (header._1.equalsIgnoreCase(CONNECTION)) {
         CONNECTION + CLOSE
-      } else if (header._1.equalsIgnoreCase(CONTENT_LENGTH) && header._2.equals(ZERO) && method.equalsIgnoreCase("DELETE")) {
+      } else if (header._1.equalsIgnoreCase(CONTENT_LENGTH) && header._2.equals(ZERO) && !method.equalsIgnoreCase("POST")) {
         header._1.toLowerCase + ':'
       } else {
         header._1.toLowerCase + ':' + header._2

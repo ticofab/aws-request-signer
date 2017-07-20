@@ -14,7 +14,7 @@ Currently available for scala 2.10, 2.11 and 2.12. In your build.sbt file,
 ```sbt
 resolvers += Resolver.jcenterRepo
 
-libraryDependencies += "io.ticofab" %% "aws-request-signer" % "0.5.0"
+libraryDependencies += "io.ticofab" %% "aws-request-signer" % "0.5.1"
 ```
 
 Sometimes Bintray has trouble syncing with JCenter (I'm looking into it). Shall you have issues with resolving, try adding the resolver to my personal repository:
