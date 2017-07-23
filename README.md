@@ -17,12 +17,6 @@ resolvers += Resolver.jcenterRepo
 libraryDependencies += "io.ticofab" %% "aws-request-signer" % "0.5.1"
 ```
 
-Sometimes Bintray has trouble syncing with JCenter (I'm looking into it). Shall you have issues with resolving, try adding the resolver to my personal repository:
-
-```sbt
-resolvers += Resolver.bintrayRepo("ticofab", "maven")
-```
-
 Usage
 -----
 
