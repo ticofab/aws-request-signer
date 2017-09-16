@@ -45,6 +45,10 @@ def getSignedHeaders(uri: String,
 
 Check the examples in the test folder of this project. Once you have the headers, add them to your HTTP request and fire it.
 
+Implementations
+---------------
+[aws-request-signer-proxy](https://github.com/charles-rumley/aws-request-signer-proxy) implements this package as a Dockerized proxy application, and provides an example integration with the [Play framework](https://www.playframework.com/).
+
 
 Dependencies
 ------------
