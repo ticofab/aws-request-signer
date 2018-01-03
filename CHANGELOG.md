@@ -1,5 +1,10 @@
 # Change Log
 
+## Version 0.5.2 *(2018-01-03)*
+
+* Minor code simplification
+* Scala 2.12.4
+
 ## Version 0.5.1 *(2017-07-20)*
 
 * Fix [#15](https://github.com/ticofab/aws-request-signer/issues/15) - thanks to [abankowski](https://github.com/abankowski)

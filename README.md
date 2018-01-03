@@ -1,7 +1,7 @@
 AWS Request Signer
 ==================
 
-*NOTE*: a broader library for this (and other) functionalities with AWS is available here: https://github.com/aws4s/aws4s
+*NOTE*: a broader library for this and other AWS features is available here: https://github.com/aws4s/aws4s
 
 Helper to evaluate the signing headers for HTTP requests to Amazon Web Services. This is a Scala port of (part of) the Java [aws-signing-request-interceptor](https://github.com/inreachventures/aws-signing-request-interceptor).
 
@@ -16,7 +16,7 @@ Currently available for scala 2.10, 2.11 and 2.12. In your build.sbt file,
 ```sbt
 resolvers += Resolver.jcenterRepo
 
-libraryDependencies += "io.ticofab" %% "aws-request-signer" % "0.5.1"
+libraryDependencies += "io.ticofab" %% "aws-request-signer" % "0.5.2"
 ```
 
 Usage
