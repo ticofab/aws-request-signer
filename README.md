@@ -1,6 +1,8 @@
 AWS Request Signer
 ==================
 
+*NOTE*: a broader library for this (and other) functionalities with AWS is available here: https://github.com/aws4s/aws4s
+
 Helper to evaluate the signing headers for HTTP requests to Amazon Web Services. This is a Scala port of (part of) the Java [aws-signing-request-interceptor](https://github.com/inreachventures/aws-signing-request-interceptor).
 
 I originally needed this library to support AWS' [Elasticsearch Service](https://aws.amazon.com/elasticsearch-service/), but this library is 'AWS service agnostic'.
