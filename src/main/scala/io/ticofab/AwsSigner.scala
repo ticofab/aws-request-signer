@@ -25,7 +25,6 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
 import com.amazonaws.auth.{AWSCredentials, AWSCredentialsProvider, AWSSessionCredentials}
-import org.apache.commons.codec.binary.Hex
 
 import scala.collection.immutable.{ListMap, TreeMap}
 
@@ -121,7 +120,7 @@ class AwsSigner(credentialsProvider: AWSCredentialsProvider,
         hmacSHA256(AWS_4_REQUEST, kService)
       }
 
-      Hex.encodeHexString(hmacSHA256(stringToSign, getSignatureKey(now, credentials)))
+      toBase16(hmacSHA256(stringToSign, getSignatureKey(now, credentials)))
     }
 
     def headerAsString(header: (String, Object), method: String): String =
@@ -146,7 +145,7 @@ class AwsSigner(credentialsProvider: AWSCredentialsProvider,
       }
 
     def toBase16(data: Array[Byte]): String =
-      data.map(byte => (BASE16MAP(byte >> 4 & 0xF), BASE16MAP(byte & 0xF))).toList.flatMap(pair => List(pair._1, pair._2)).mkString
+      data.flatMap(byte => Array(BASE16MAP(byte >> 4 & 0xF), BASE16MAP(byte & 0xF))).mkString
 
     def createStringToSign(canonicalRequest: String, now: LocalDateTime): String =
       AWS4_HMAC_SHA256 + RETURN +

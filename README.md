@@ -1,6 +1,8 @@
 AWS Request Signer
 ==================
 
+*NOTE*: a broader library for this (and other) functionalities with AWS is available here: https://github.com/aws4s/aws4s
+
 Helper to evaluate the signing headers for HTTP requests to Amazon Web Services. This is a Scala port of (part of) the Java [aws-signing-request-interceptor](https://github.com/inreachventures/aws-signing-request-interceptor).
 
 I originally needed this library to support AWS' [Elasticsearch Service](https://aws.amazon.com/elasticsearch-service/), but this library is 'AWS service agnostic'.
@@ -15,12 +17,6 @@ Currently available for scala 2.10, 2.11 and 2.12. In your build.sbt file,
 resolvers += Resolver.jcenterRepo
 
 libraryDependencies += "io.ticofab" %% "aws-request-signer" % "0.5.1"
-```
-
-Sometimes Bintray has trouble syncing with JCenter (I'm looking into it). Shall you have issues with resolving, try adding the resolver to my personal repository:
-
-```sbt
-resolvers += Resolver.bintrayRepo("ticofab", "maven")
 ```
 
 Usage
@@ -50,6 +46,10 @@ def getSignedHeaders(uri: String,
 
 
 Check the examples in the test folder of this project. Once you have the headers, add them to your HTTP request and fire it.
+
+Implementations
+---------------
+[aws-request-signer-proxy](https://github.com/charles-rumley/aws-request-signer-proxy) implements this package as a Dockerized proxy application, and provides an example integration with the [Play framework](https://www.playframework.com/).
 
 
 Dependencies
