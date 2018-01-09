@@ -81,6 +81,7 @@ class AwsSigner(credentialsProvider: AWSCredentialsProvider,
   val ZERO = "0"
   val CONTENT_LENGTH = "Content-Length"
   val AUTHORIZATION = "Authorization"
+  val CONTENT_SHA256_HEADER = "x-amz-content-sha256"
   val SESSION_TOKEN = "x-amz-security-token"
   val DATE = "date"
   val DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'")
@@ -166,6 +167,21 @@ class AwsSigner(credentialsProvider: AWSCredentialsProvider,
       result += (X_AMZ_DATE -> now.format(DATE_FORMATTER))
     }
 
+    val payloadSignature = payload.map(p => toBase16(hash(p)))
+
+    val contentSignature = result.get(CONTENT_SHA256_HEADER) match {
+      case Some(signature) =>
+        if (payloadSignature.exists(_ != signature))
+          throw new IllegalArgumentException(s"Request already contain $CONTENT_SHA256_HEADER with hash " +
+            s"different than hash of provided payload.")
+        signature
+      case None =>
+        val sig = payloadSignature.getOrElse(toBase16(hash(EMPTY.getBytes(StandardCharsets.UTF_8))))
+        // Adding content signature to the request headers
+        result += CONTENT_SHA256_HEADER -> sig
+        sig
+    }
+
     credentials match {
       case asc: AWSSessionCredentials => result += (SESSION_TOKEN -> asc.getSessionToken)
       case _ => // do nothing
@@ -181,7 +197,7 @@ class AwsSigner(credentialsProvider: AWSCredentialsProvider,
         queryParamsString(queryParams) + RETURN +
         headersString + RETURN +
         signedHeaderKeys + RETURN +
-        toBase16(hash(payload.getOrElse(EMPTY.getBytes(StandardCharsets.UTF_8))))
+        contentSignature
 
     val stringToSign = createStringToSign(canonicalRequest, now)
     val signature = sign(stringToSign, now, credentials)
