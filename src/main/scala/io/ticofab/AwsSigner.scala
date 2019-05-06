@@ -62,7 +62,6 @@ class AwsSigner(credentialsProvider: AWSCredentialsProvider,
                 service: String,
                 clock: () => LocalDateTime) {
 
-  val BASE16MAP = Array[Char]('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f')
   val HMAC_SHA256 = "HmacSHA256"
   val SLASH = "/"
   val X_AMZ_DATE = "x-amz-date"
@@ -144,8 +143,7 @@ class AwsSigner(credentialsProvider: AWSCredentialsProvider,
         case n: NoSuchAlgorithmException => throw n
       }
 
-    def toBase16(data: Array[Byte]): String =
-      data.flatMap(byte => Array(BASE16MAP(byte >> 4 & 0xF), BASE16MAP(byte & 0xF))).mkString
+    def toBase16(data: Array[Byte]): String = data.map("%02x" format _).mkString
 
     def createStringToSign(canonicalRequest: String, now: LocalDateTime): String =
       AWS4_HMAC_SHA256 + RETURN +
