@@ -1,7 +1,7 @@
 AWS Request Signer
 ==================
 
-*NOTE*: a broader library for this and other AWS features is available here: https://github.com/aws4s/aws4s
+**NOTE**: this project is deprecated in favor of a broader library for this and other AWS features. See here: https://github.com/aws4s/aws4s
 
 Helper to evaluate the signing headers for HTTP requests to Amazon Web Services. This is a Scala port of (part of) the Java [aws-signing-request-interceptor](https://github.com/inreachventures/aws-signing-request-interceptor).
 
